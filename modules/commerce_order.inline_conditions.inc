@@ -8,9 +8,9 @@
  */
 
 /**
- * Implements hook_inline_condition_info().
+ * Implements hook_inline_conditions_info().
  */
-function commerce_order_inline_condition_info() {
+function commerce_order_inline_conditions_info() {
   $conditions = array();
 
   $conditions['inline_conditions_order_total'] = array(

@@ -9,9 +9,9 @@
  */
 
 /**
- * Implements hook_inline_condition_info().
+ * Implements hook_inline_conditions_info().
  */
-function commerce_shipping_inline_condition_info() {
+function commerce_shipping_inline_conditions_info() {
   $conditions = array();
 
   $conditions['inline_conditions_shipping_method'] = array(

@@ -32,7 +32,7 @@
  *   - build: Gets the rule and any settings added by the configure callback,
  *     then builds and adds an actual rules condition to the rule.
  */
-function hook_inline_condition_info() {
+function hook_inline_conditions_info() {
   $conditions = array();
   $conditions['inline_conditions_order_total'] = array(
     'label' => t('Orders over'),
@@ -49,29 +49,7 @@ function hook_inline_condition_info() {
 /**
  * Alter the condition info.
  */
-function hook_inline_condition_info_alter(&$conditions) {
+function hook_inline_conditions_info_alter(&$conditions) {
   $conditions['inline_conditions_order_total']['label'] = t('Order total over');
-}
-
-/**
- * Configuration callback for inline_conditions_order_total.
- */
-function inline_conditions_order_total_configure($settings) {
-  $form = array();
-  $form['total'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Order amount'),
-    '#default_value' => $settings['total'],
-    '#size' => 10,
-  );
-
-  return $form;
-}
-
-/**
- * Build callback for inline_conditions_order_total.
- */
-function inline_conditions_order_total_build($rule, $settings) {
-
 }
 

@@ -4,8 +4,10 @@
  * Manage frequently used conditions directly on the relevant form.
  */
 
-// Load rules configuration files of related enabled modules.
-inline_conditions_load_rules_configuration_files();
+// Load local conditions files located into /modules folder.
+foreach (module_list() as $module) {
+  module_load_include('inc', 'inline_conditions', "modules/$module.inline_conditions");
+}
 
 /**
  * Implements hook_menu().
@@ -22,6 +24,19 @@ function inline_conditions_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Implements hook_hook_info().
+ */
+function inline_conditions_hook_info() {
+  $hooks['inline_conditions_info'] = array(
+    'group' => 'inline_conditions',
+  );
+  $hooks['inline_conditions_info_alter'] = array(
+    'group' => 'inline_conditions',
+  );
+  return $hooks;
 }
 
 /**
@@ -159,17 +174,6 @@ function _inline_conditions_autocomplete_validate($element, &$form_state, $form)
   form_set_value($element, $value, $form_state);
 }
 
-
-/**
- * Implements hook_hook_info().
- */
-function inline_conditions_hook_info() {
-  $hooks['inline_condition_info'] = array(
-    'group' => 'rules',
-  );
-  return $hooks;
-}
-
 /**
  * Implements hook_field_info().
  */
@@ -270,24 +274,6 @@ function inline_conditions_entity_metadata_field_property_set($entity, $name, $v
  * Implements hook_field_load().
  *
  * Prepare items array in order to be usable with inline_condition field widget.
- *
- * @param string $entity_type
- *   The type of $entity.
- * @param array $entities
- *   Array of entities being loaded, keyed by entity ID.
- * @param array $field
- *   The field structure for the operation.
- * @param array $instances
- *   Array of instance structures for $field for each entity, keyed by entity
- *   ID.
- * @param string $langcode
- *   The language code associated with $items.
- * @param array $items
- *   Array of field values already loaded for the entities, keyed by entity ID.
- *   Store your changes in this parameter (passed by reference).
- * @param string $age
- *   FIELD_LOAD_CURRENT to load the most recent revision for all fields, or
- *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  */
 function inline_conditions_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
   // Loop on every entities given.
@@ -315,22 +301,6 @@ function inline_conditions_field_load($entity_type, $entities, $field, $instance
  *
  * Call inline_conditions_prepare_field_items() in order to re-struturize items.
  *
- * $items var is a two-dimensional array and it has to be prepared in order to
- * be saved. We use the column "main_delta" to store the parent delta of items.
- *
- * @param string $entity_type
- *   The type of $entity.
- * @param object $entity
- *   The entity for the operation.
- * @param array $field
- *   The field structure for the operation.
- * @param array $instance
- *   The instance structure for $field on $entity's bundle.
- * @param string $langcode
- *   The language associated with $items.
- * @param array &$items
- *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
- *
  * @see inline_conditions_field_prepare_items()
  */
 function inline_conditions_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
@@ -345,19 +315,6 @@ function inline_conditions_field_insert($entity_type, $entity, $field, $instance
  *
  * Call inline_conditions_prepare_field_items() in order to re-struturize items.
  *
- * @param string $entity_type
- *   The type of $entity.
- * @param object $entity
- *   The entity for the operation.
- * @param array $field
- *   The field structure for the operation.
- * @param array $instance
- *   The instance structure for $field on $entity's bundle.
- * @param string $langcode
- *   The language associated with $items.
- * @param array &$items
- *   $entity->{$field['field_name']}[$langcode], or an empty array if unset.
- *
  * @see inline_conditions_field_prepare_items()
  */
 function inline_conditions_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
@@ -369,17 +326,6 @@ function inline_conditions_field_update($entity_type, $entity, $field, $instance
 
 /**
  * Implements hook_field_is_empty().
- *
- * Define what constitutes an empty item for inline_condition field type.
- *
- * @param array $item
- *   An item that may or may not be empty.
- * @param array $field
- *   The field to which $item belongs.
- *
- * @return boolean
- *   TRUE if $field's type considers $item not to c ontain any data;
- *   FALSE otherwise.
  */
 function inline_conditions_field_is_empty($item, $field) {
   return empty($item['condition_name']);
@@ -617,8 +563,8 @@ function inline_conditions_get_info($condition_name = NULL) {
 
   if (!isset($conditions)) {
     $conditions = array();
-    foreach (module_implements('inline_condition_info') as $module) {
-      foreach (module_invoke($module, 'inline_condition_info') as $condition => $condition_info) {
+    foreach (module_implements('inline_conditions_info') as $module) {
+      foreach (module_invoke($module, 'inline_conditions_info') as $condition => $condition_info) {
         $condition_info += array(
           // Remember the providing module.
           'module' => $module,
@@ -627,7 +573,7 @@ function inline_conditions_get_info($condition_name = NULL) {
       }
     }
 
-    drupal_alter('inline_condition_info', $types);
+    drupal_alter('inline_conditions_info', $types);
   }
 
   if (isset($condition_name)) {
@@ -669,47 +615,4 @@ function inline_conditions_get_info_by_type($entity_type, $parent_entity_type) {
   }
 
   return $filtered_conditions;
-}
-
-/**
- * Callback: Get rules configuration files from inline_conditions module.
- *
- * @return array
- *   An array of rules configuration files.
- */
-function inline_conditions_get_rules_configuration_files() {
-  $rules_files = & drupal_static(__FUNCTION__);
-
-  // Get a listing or rules configuration files.
-  if (!isset($rules_files)) {
-    $rules_files = drupal_system_listing('/.rules.inc/i', drupal_get_path('module', 'inline_conditions') . '/modules', 'name', 0);
-  }
-
-  return $rules_files;
-}
-
-/**
- * Callback: Load rules configuration files of enabled modules.
- *
- * @param array $rules_files
- *   A list of rules configurations files.
- */
-function inline_conditions_load_rules_configuration_files($rules_files = array()) {
-  if (empty($rules_files)) {
-    $rules_files = inline_conditions_get_rules_configuration_files();
-  }
-
-  if (!empty($rules_files)) {
-    // Load module list.
-    $modules = module_list();
-
-    // Loop on every rules configuration file and check if the corresponding
-    // module is enabled in order to load its rules configuration file.
-    foreach ($rules_files as $path => $file) {
-      if (array_key_exists(substr($file->name, 0, -6), $modules)) {
-        // Load the configuration file.
-        module_load_include('inc', 'inline_conditions', 'modules/' . $file->name);
-      }
-    }
-  }
 }

@@ -5,12 +5,12 @@
  */
 
 /**
- * Implements hook_inline_condition_info().
+ * Implements hook_inline_conditions_info().
  *
  * This condition only check if the product has implemented a term
  * reference field.
  */
-function taxonomy_inline_condition_info() {
+function taxonomy_inline_conditions_info() {
   $conditions = array();
 
   $conditions['inline_conditions_taxonomy'] = array(
