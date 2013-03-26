@@ -5,8 +5,10 @@
  */
 
 // Load local conditions files located into /modules folder.
-foreach (module_list() as $module) {
-  module_load_include('inc', 'inline_conditions', "modules/$module.inline_conditions");
+foreach (array('commerce_order', 'commerce_product') as $module) {
+  if (module_exists($module)) {
+    module_load_include('inc', 'inline_conditions', "modules/$module.inline_conditions");
+  }
 }
 
 /**
@@ -456,8 +458,8 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
           'wrapper'  => 'inline-conditions-' . $field['field_name'],
           'effect'   => 'fade',
         ),
-        '#element_delta'      => $delta,
-        '#condition_action'  => 0,
+        '#element_delta'            => $delta,
+        '#condition_action'         => 0,
         '#executes_submit_callback' => FALSE,
         '#limit_validation_errors'  => array(),
       );
@@ -471,16 +473,16 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
 
   // Add the "Add another" button.
   $element['add_more'] = array(
-    '#type'          => 'button',
-    '#name'          => $field['field_name'] . '-' . $instance['id'] . '-add_condition',
-    '#value'         => t('Add a new condition'),
-    '#ajax'          => array(
+    '#type'             => 'button',
+    '#name'             => $field['field_name'] . '-' . $instance['id'] . '-add_condition',
+    '#value'            => t('Add a new condition'),
+    '#ajax'             => array(
       'callback' => 'inline_conditions_form_ajax_callback',
       'wrapper'  => 'inline-conditions-' . $field['field_name'],
       'effect'   => 'fade',
     ),
-    '#element_delta' => $element['#delta'],
-    '#condition_action'  => 1,
+    '#element_delta'    => $element['#delta'],
+    '#condition_action' => 1,
   );
 
   return $element;

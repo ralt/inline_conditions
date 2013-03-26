@@ -10,24 +10,6 @@
 function commerce_product_inline_conditions_info() {
   $conditions = array();
 
-  $conditions['inline_conditions_order_product'] = array(
-    'label'       => t('Product'),
-    'entity type' => 'commerce_order',
-    'callbacks'   => array(
-      'configure' => 'inline_conditions_order_product_configure',
-      'build'     => 'inline_conditions_product_build',
-    ),
-  );
-
-  $conditions['inline_conditions_order_product_quantity'] = array(
-    'label'       => t('Product and quantity'),
-    'entity type' => 'commerce_order',
-    'callbacks'   => array(
-      'configure' => 'inline_conditions_product_quantity_configure',
-      'build'     => 'inline_conditions_product_quantity_build',
-    ),
-  );
-
   $conditions['inline_conditions_product'] = array(
     'label'       => t('Product'),
     'entity type' => 'commerce_line_item',
@@ -37,45 +19,18 @@ function commerce_product_inline_conditions_info() {
     ),
   );
 
-  return $conditions;
-}
-
-/**
- * Configuration callback for inline_conditions_order_product.
- *
- * @param array $settings
- *   Values for the form element.
- *
- * @return array
- *   Return a form element.
- */
-function inline_conditions_order_product_configure($settings) {
-  // Get product IDs from $settings.
-  $default_value = '';
-  if (isset($settings['products'])) {
-    foreach ($settings['products'] as $delta => $target_id) {
-      $product = commerce_product_load($settings['products'][$delta]['target_id']);
-      $default_value .= $product->title . ' (' . $product->product_id . ')';
-      if (($delta + 1) < count($settings['products'])) {
-        $default_value .= ', ';
-      }
-    }
+  if (module_exists('taxonomy')) {
+    $conditions['inline_conditions_taxonomy'] = array(
+      'label'       => t('Product category'),
+      'entity type' => 'commerce_line_item',
+      'callbacks'   => array(
+        'configure' => 'inline_conditions_product_taxonomy_configure',
+        'build'     => 'inline_conditions_product_taxonomy_build',
+      ),
+    );
   }
 
-  $form = array();
-
-  $form['products'] = array(
-    '#type'              => 'textfield',
-    '#title'             => t('SKUs'),
-    '#title_display'     => 'invisible',
-    '#default_value'     => $default_value,
-    '#required'          => TRUE,
-    '#autocomplete_path' => 'inline_conditions/autocomplete/commerce_product/0/0',
-    '#element_validate'  => array('_inline_conditions_autocomplete_validate'),
-    '#suffix'            => '<div class="condition-instructions">' . t('Select products when ordered make discount active.') . '</div>',
-  );
-
-  return $form;
+  return $conditions;
 }
 
 /**
@@ -178,194 +133,103 @@ function inline_conditions_product_build(EntityDrupalWrapper $wrapper, $settings
 }
 
 /**
- * Configure callback for inline_conditions_product_quantity.
+ * Configuration callback for inline_conditions_taxonomy on product.
  *
  * @param array $settings
  *   Values for the form element.
  *
  * @return array
- *   Return the form element to display.
+ *   Return a form element.
  */
-function inline_conditions_product_quantity_configure($settings) {
-  // Set default values for form elements.
-  $product_value = '';
-  $min_quantity_value = '';
-  $max_quantity_value = '';
+function inline_conditions_product_taxonomy_configure($settings) {
+  $form = array();
 
-  // Try to get product quantity.
-  if (isset($settings['product_quantity']['products'])) {
-    foreach ($settings['product_quantity']['products'] as $delta => $target_id) {
-      $product = commerce_product_load($settings['product_quantity']['products'][$delta]['target_id']);
-      $product_value .= $product->title . ' (' . $product->product_id . ')';
-      if (($delta + 1) < count($settings['product_quantity']['products'])) {
-        $product_value .= ', ';
+  $default_value = '';
+  if (!empty($settings['taxonomy']['terms'])) {
+    foreach ($settings['taxonomy']['terms'] as $delta => $term) {
+      $default_value .= taxonomy_term_load($term['target_id'])->name . ' (' . $term['target_id'] . ')';
+      if (($delta + 1) < count($settings['taxonomy']['terms'])) {
+        $default_value .= ', ';
       }
     }
   }
-  if (isset($settings['product_quantity']['min_quantity']) && isset($settings['product_quantity']['max_quantity'])) {
-    $min_quantity_value = $settings['product_quantity']['min_quantity'];
-    $max_quantity_value = $settings['product_quantity']['max_quantity'];
-  }
 
-  $form = array();
-
-  $form['product_quantity'] = array(
-    '#type'   => 'container',
-    '#suffix' => '<div class="condition-instructions">' . t('Select product(s) and quantity range to activate the current discount.') . '</div>',
-  );
-
-  $form['product_quantity']['products'] = array(
+  $form['taxonomy']['terms'] = array(
     '#type'              => 'textfield',
-    '#title'             => t('product:'),
-    '#default_value'     => $product_value,
-    '#size'              => 40,
+    '#title'             => t('Terms'),
+    '#title_display'     => 'invisible',
     '#required'          => TRUE,
-    '#autocomplete_path' => 'inline_conditions/autocomplete/commerce_product/0/0',
+    '#default_value'     => $default_value,
+    '#autocomplete_path' => 'inline_conditions/autocomplete/taxonomy_term/1/0',
     '#element_validate'  => array('_inline_conditions_autocomplete_validate'),
-  );
-
-  $form['product_quantity']['min_quantity'] = array(
-    '#type'             => 'textfield',
-    '#title'            => t('minimum quantity:'),
-    '#default_value'    => $min_quantity_value,
-    '#size'             => 5,
-    '#required'         => TRUE,
-    '#element_validate' => array('_inline_conditions_product_min_quantity_validate'),
-  );
-
-  $form['product_quantity']['max_quantity'] = array(
-    '#type'             => 'textfield',
-    '#title'            => t('and maximum quantity:'),
-    '#default_value'    => $max_quantity_value,
-    '#size'             => 5,
-    '#required'         => FALSE,
-    '#element_validate' => array('_inline_conditions_product_max_quantity_validate'),
   );
 
   return $form;
 }
 
 /**
- * Build callback for inline_conditions_product_quantity.
+ * Build callback for inline_conditions_taxonomy on product.
  *
  * @param EntityDrupalWrapper $wrapper
- *   Wrapped entity given by the rule.
+ *   Wrapped entity type given by the rule.
  * @param array $settings
- *   Settings given by the rule.
+ *   Values for the condition settings.
  *
  * @return boolean
- *   True if the condition is valid. False otherwise.
+ *   True is sub condition is valid. FALSE otherwise.
  */
-function inline_conditions_product_quantity_build(EntityDrupalWrapper $wrapper, $settings) {
-  switch ($wrapper->type()) {
-    // Check if the given object is commerce_order type.
-    case 'commerce_order':
-      // Get an array of product ids from condition settings.
-      $product_ids = array();
-      foreach ($settings['product_quantity']['products'] as $delta => $product) {
-        $product_ids[$product['target_id']] = $product['target_id'];
-      }
+function inline_conditions_product_taxonomy_build(EntityDrupalWrapper $wrapper, $settings) {
 
-      // Get product quantity to check.
-      $min_quantity = $settings['product_quantity']['min_quantity'];
-      $max_quantity = $settings['product_quantity']['max_quantity'];
+  if ($wrapper->type() == 'commerce_line_item') {
+    // Get terms ids from $settings.
+    $term_ids = array();
+    foreach ($settings['taxonomy']['terms'] as $delta => $term) {
+      $term_ids[$term['target_id']] = $term['target_id'];
+    }
 
-      // If max quantity has not been set.
-      if (empty($max_quantity)) {
-        // Compare discount product ids with thoses of given order.
-        foreach ($wrapper->commerce_line_items->value() as $line_item) {
-          // Ensures that the type of current line item is product.
-          if ($line_item->type == 'product') {
-            // Wrap line item data.
-            $wrapper_line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
+    if ($wrapper->getBundle() == 'product') {
+      // Get the product.
+      $product = $wrapper->commerce_product->value();
 
-            // Get product fully qualified object.
-            $product = $wrapper_line_item->commerce_product->value();
-            // Check if both product ID and quantity match.
-            if (array_key_exists($product->product_id, $product_ids) && $min_quantity <= $line_item->quantity) {
-              unset($product_ids[$product->product_id]);
-            }
-          }
-        }
-      }
-      else {
-        // Compare discount product ids with thoses of given order.
-        foreach ($wrapper->commerce_line_items->value() as $line_item) {
-          // Ensures that the type of current line item is product.
-          if ($line_item->type == 'product') {
-            // Wrap line item data.
-            $wrapper_line_item = entity_metadata_wrapper('commerce_line_item', $line_item);
+      // Get properties of commerce_product entity type.
+      $product_properties = entity_get_property_info('commerce_product');
 
-            // Get product fully qualified object.
-            $product = $wrapper_line_item->commerce_product->value();
-            // Check if both product ID and quantity match.
-            if (array_key_exists($product->product_id, $product_ids) &&
-              $min_quantity <= $line_item->quantity &&
-              $max_quantity >= $line_item->quantity
-            ) {
-              unset($product_ids[$product->product_id]);
-            }
-          }
+      // Initialize an array storing field name of term reference type
+      // field for the current product type.
+      $term_fields = array();
+      // Fetch all the fields name of taxonomy_term type for the current
+      // product type.
+      foreach ($product_properties['bundles'][$product->type]['properties'] as $field_name => $field_value) {
+        if (preg_match('/taxonomy_term/', $field_value['type'])) {
+          $term_fields[] = $field_name;
         }
       }
 
-      // If the array is empty, every product are in the order, so return TRUE.
-      if (empty($product_ids)) {
-        return TRUE;
+      foreach ($term_fields as $delta => $field_term_name) {
+        // Get the value of the taxonomy term field.
+        $field_term_value = field_get_items('commerce_product', $product, $field_term_name);
+        if (!empty($field_term_value)) {
+          // Unset term id if found into product taxonomy field.
+          foreach ($field_term_value as $delta => $term_id) {
+            if (array_key_exists($term_id['tid'], $term_ids)) {
+              unset($term_ids[$term_id['tid']]);
+            }
+          }
+
+          // If doesn't match every terms from rule settings, return FALSE.
+          if (!empty($term_ids)) {
+            return FALSE;
+          }
+        }
+        // The product taxonomy term field is empty, return FALSE.
+        else {
+          return FALSE;
+        }
+        // Unset field term values.
+        unset($field_term_value);
       }
-      break;
+    }
+    return TRUE;
   }
   return FALSE;
-}
-
-/**
- * Validation callback for max_quantity element.
- *
- * @param array $element
- *   The form element.
- * @param array $form_state
- *   The form state array.
- * @param array $form
- *   The form array.
- */
-function _inline_conditions_product_max_quantity_validate($element, &$form_state, $form) {
-  // Fetch form element value.
-  $value = $element['#value'];
-
-  if (!empty($value)) {
-    // Get container of quantity form elements.
-    $container = drupal_array_get_nested_value($form, array_slice($element['#array_parents'], 0, -1));
-
-    // Get value of min_quantity form element.
-    $min_quantity = (int) $container['min_quantity']['#value'];
-    $max_quantity = (int) $value;
-
-    if ($max_quantity <= $min_quantity) {
-      form_set_error(implode('][', $element['#array_parents']), t('Maximum quantity must be greater than minimum quantity.'));
-    }
-  }
-  elseif ($value === "0") {
-    form_set_error(implode('][', $element['#array_parents']), t('Maximun quantity is an integer and greater than 0'));
-  }
-}
-
-
-/**
- * Validation callback for min_quantity element.
- *
- * @param array $element
- *   The form element.
- * @param array $form_state
- *   The form state array.
- * @param array $form
- *   The form array.
- */
-function _inline_conditions_product_min_quantity_validate($element, &$form_state, $form) {
-  // Fetch form element value.
-  $value = (int) $element['#value'];
-
-  // Check if quantity value is an integer and greater than 0.
-  if (!is_int($value) || $value <= 0) {
-    form_set_error(implode('][', $element['#array_parents']), t('Mininimum quantity is an integer and greater than 0'));
-  }
 }
