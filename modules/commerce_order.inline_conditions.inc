@@ -623,8 +623,8 @@ function inline_conditions_order_taxonomy_configure($settings) {
   }
 
   $form['taxonomy'] = array(
-    '#type' => 'container',
-    '#attributes'       => array('class' => array('product-taxonomy')),
+    '#type'       => 'container',
+    '#attributes' => array('class' => array('product-taxonomy')),
   );
 
   $form['taxonomy']['terms'] = array(
@@ -643,11 +643,11 @@ function inline_conditions_order_taxonomy_configure($settings) {
   );
 
   $form['taxonomy']['config'] = array(
-    '#type' => 'radios',
-    '#title' => t('Config'),
+    '#type'          => 'radios',
+    '#title'         => t('Config'),
     '#title_display' => 'invisible',
     '#default_value' => isset($settings['taxonomy']['config']) ? $settings['taxonomy']['config'] : 1,
-    '#options' => $options,
+    '#options'       => $options,
   );
 
   return $form;

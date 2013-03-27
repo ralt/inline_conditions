@@ -551,6 +551,38 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
 }
 
 /**
+ * Defines a callback to add condition(s) to the given rule.
+ *
+ * When a rule is being built, it goes over the $field_values, and for each
+ * condition it calls the conditions "build" function.
+ *
+ * @param RulesReactionRule $rule
+ *   The parent rule.
+ * @param array $field_values
+ *   An array of values from an inline_conditions field.
+ */
+function inline_conditions_build(RulesReactionRule $rule, $field_values) {
+  if (!empty($field_values)) {
+    foreach ($field_values as $value) {
+      // Get the condition info.
+      $condition = inline_conditions_get_info($value['condition_name']);
+      // Ensure we got the condition and we have settings for the rule
+      // condition.
+      if (!$condition || empty($value['condition_settings'])) {
+        continue;
+      }
+
+      $rule->condition(
+        $value['condition_name'], array(
+          'entity:select'      => $condition['entity type'],
+          'condition_settings' => serialize($value['condition_settings']),
+        )
+      );
+    }
+  }
+}
+
+/**
  * Returns the info array of a condition.
  *
  * @param string $condition_name
@@ -575,7 +607,7 @@ function inline_conditions_get_info($condition_name = NULL) {
       }
     }
 
-    drupal_alter('inline_conditions_info', $types);
+    drupal_alter('inline_conditions_info', $conditions);
   }
 
   if (isset($condition_name)) {

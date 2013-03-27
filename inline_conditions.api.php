@@ -52,4 +52,3 @@ function hook_inline_conditions_info() {
 function hook_inline_conditions_info_alter(&$conditions) {
   $conditions['inline_conditions_order_total']['label'] = t('Order total over');
 }
-
