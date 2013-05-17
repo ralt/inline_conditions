@@ -52,3 +52,16 @@ function hook_inline_conditions_info() {
 function hook_inline_conditions_info_alter(&$conditions) {
   $conditions['inline_conditions_order_total']['label'] = t('Order total over');
 }
+
+/**
+ * Alter fields values before building the rule.
+ *
+ * @see inline_conditions_build().
+ */
+function hook_inline_conditions_build_alter(&$value) {
+  foreach ($field_values as &$value) {
+    if ($value['condition_name'] == 'commerce_order_has_owner') {
+      // Do your stuff here.
+    }
+  }
+}

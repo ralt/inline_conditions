@@ -18,11 +18,11 @@ function inline_conditions_menu() {
   $items = array();
 
   $items['inline_conditions/autocomplete/%/%/%'] = array(
-    'title'           => 'Inline Conditions Autocomplete',
-    'page callback'   => 'inline_conditions_autocomplete_callback',
-    'page arguments'  => array(2, 3, 4, 5),
+    'title' => 'Inline Conditions Autocomplete',
+    'page callback' => 'inline_conditions_autocomplete_callback',
+    'page arguments' => array(2, 3, 4, 5),
     'access callback' => TRUE,
-    'type'            => MENU_CALLBACK,
+    'type' => MENU_CALLBACK,
   );
 
   return $items;
@@ -38,6 +38,7 @@ function inline_conditions_hook_info() {
   $hooks['inline_conditions_info_alter'] = array(
     'group' => 'inline_conditions',
   );
+
   return $hooks;
 }
 
@@ -47,14 +48,14 @@ function inline_conditions_hook_info() {
  * Assumes "tag mode" (multiple allowed entries).
  * Mostly stolen from entityreference.
  *
- * @param string $entity_type
+ * @param string  $entity_type
  *   The entity type.
  * @param boolean $product_mode
  *   Boolean indicating whether to limit nodes to product display nodes, and
  *   taxonomy terms to vocabularies used by product display nodes.
  * @param boolean $single
  *   Indicate a single value autocomple field.
- * @param string $string
+ * @param string  $string
  *   The label of the entity to query by.
  */
 function inline_conditions_autocomplete_callback($entity_type, $product_mode, $single = FALSE, $string = '') {
@@ -182,16 +183,16 @@ function _inline_conditions_autocomplete_validate($element, &$form_state, $form)
 function inline_conditions_field_info() {
   return array(
     'inline_conditions' => array(
-      'label'              => t('Inline conditions'),
-      'description'        => t(
+      'label' => t('Inline conditions'),
+      'description' => t(
         'This field stores conditions that are later added to a matching rule.'
       ),
       // entity_type is the type of the entity operated on by the matching rule.
-      'instance_settings'  => array('entity_type' => NULL),
-      'default_widget'     => 'inline_conditions',
-      'default_formatter'  => 'hidden',
-      'no_ui'              => TRUE,
-      'property_type'      => 'inline_conditions',
+      'instance_settings' => array('entity_type' => NULL),
+      'default_widget' => 'inline_conditions',
+      'default_formatter' => 'hidden',
+      'no_ui' => TRUE,
+      'property_type' => 'inline_conditions',
       'property_callbacks' => array('inline_conditions_field_property_callback'),
     ),
   );
@@ -203,13 +204,13 @@ function inline_conditions_field_info() {
 function inline_conditions_field_widget_info() {
   return array(
     'inline_conditions' => array(
-      'label'       => t('Inline conditions'),
+      'label' => t('Inline conditions'),
       'field types' => array('inline_conditions'),
-      'behaviors'   => array(
+      'behaviors' => array(
         'multiple values' => FIELD_BEHAVIOR_CUSTOM,
-        'default value'   => FIELD_BEHAVIOR_NONE,
+        'default value' => FIELD_BEHAVIOR_NONE,
       ),
-      'settings'    => array(),
+      'settings' => array(),
     ),
   );
 }
@@ -242,6 +243,7 @@ function inline_conditions_entity_metadata_field_property_get($entity, array $op
       $values[$delta] = $rows;
     }
   }
+
   // For an empty single-valued field, we have to return NULL.
   return $field['cardinality'] == 1 ? ($values ? reset(
     $values
@@ -382,9 +384,9 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
   define('ADD_CONDITION', 1);
 
   $element = array(
-    '#type'             => 'container',
-    '#prefix'           => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
-    '#suffix'           => '</div>',
+    '#type' => 'container',
+    '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
+    '#suffix' => '</div>',
     '#element_validate' => array('inline_conditions_field_widget_form_validate'),
   ) + $element;
 
@@ -400,7 +402,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     if ($form_state['triggering_element']['#condition_action'] == ADD_CONDITION) {
       // Ensure we are on the right row.
       $items[] = array(
-        'condition_name'     => '',
+        'condition_name' => '',
         'condition_settings' => array(),
       );
     }
@@ -420,24 +422,24 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
 
     $id = 'inline-conditions-' . $field['field_name'] . '-' . $instance['id'] . '-' . $delta;
     $element[$delta] = array(
-      '#type'   => 'container',
+      '#type' => 'container',
       '#prefix' => '<div id="' . $id . '">',
       '#suffix' => '</div>',
     );
     $element[$delta]['condition_name'] = array(
-      '#type'          => 'select',
-      '#title'         => t('Apply to:'),
-      '#options'       => $condition_list,
+      '#type' => 'select',
+      '#title' => t('Apply to:'),
+      '#options' => $condition_list,
       '#default_value' => $condition_name,
-      '#ajax'          => array(
+      '#ajax' => array(
         'callback' => 'inline_conditions_form_ajax_callback',
-        'wrapper'  => $id,
+        'wrapper' => $id,
       ),
       // Identifies the condition operated upon.
-      '#condition_id'  => $delta,
+      '#condition_id' => $delta,
     );
     $element[$delta]['condition_settings'] = array(
-      '#type'  => 'value',
+      '#type' => 'value',
       '#value' => array(),
     );
 
@@ -450,18 +452,18 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
 
     if ($delta > 0) {
       $element[$delta]['remove_condition'] = array(
-        '#type'                     => 'button',
-        '#name'                     => $field['field_name'] . '-' . $instance['id'] . '-' . $delta . '-remove_condition',
-        '#value'                    => t('Remove'),
-        '#ajax'                     => array(
+        '#type' => 'button',
+        '#name' => $field['field_name'] . '-' . $instance['id'] . '-' . $delta . '-remove_condition',
+        '#value' => t('Remove'),
+        '#ajax' => array(
           'callback' => 'inline_conditions_form_ajax_callback',
-          'wrapper'  => 'inline-conditions-' . $field['field_name'],
-          'effect'   => 'fade',
+          'wrapper' => 'inline-conditions-' . $field['field_name'],
+          'effect' => 'fade',
         ),
-        '#element_delta'            => $delta,
-        '#condition_action'         => 0,
+        '#element_delta' => $delta,
+        '#condition_action' => 0,
         '#executes_submit_callback' => FALSE,
-        '#limit_validation_errors'  => array(),
+        '#limit_validation_errors' => array(),
       );
 
       $element[$delta]['condition_name']['#title_display'] = 'invisible';
@@ -473,15 +475,15 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
 
   // Add the "Add another" button.
   $element['add_more'] = array(
-    '#type'             => 'button',
-    '#name'             => $field['field_name'] . '-' . $instance['id'] . '-add_condition',
-    '#value'            => t('Add a new condition'),
-    '#ajax'             => array(
+    '#type' => 'button',
+    '#name' => $field['field_name'] . '-' . $instance['id'] . '-add_condition',
+    '#value' => t('Add a new condition'),
+    '#ajax' => array(
       'callback' => 'inline_conditions_form_ajax_callback',
-      'wrapper'  => 'inline-conditions-' . $field['field_name'],
-      'effect'   => 'fade',
+      'wrapper' => 'inline-conditions-' . $field['field_name'],
+      'effect' => 'fade',
     ),
-    '#element_delta'    => $element['#delta'],
+    '#element_delta' => $element['#delta'],
     '#condition_action' => 1,
   );
 
@@ -543,6 +545,7 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
   // Triggered when user selects a condition.
   if (isset($form_state['triggering_element']['#condition_id'])) {
     $condition_id = $form_state['triggering_element']['#condition_id'];
+
     return $element[$condition_id];
   }
   else {
@@ -558,12 +561,17 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
  *
  * @param RulesReactionRule $rule
  *   The parent rule.
- * @param array $field_values
+ * @param array             $field_values
  *   An array of values from an inline_conditions field.
+ *
+ * @see hook_inline_conditions_prebuild_alter().
  */
 function inline_conditions_build(RulesReactionRule $rule, $field_values) {
   if (!empty($field_values)) {
     foreach ($field_values as $value) {
+      // Give a chance to others module to alter the current field value.
+      drupal_alter('inline_conditions_build', $value);
+
       // Get the condition info.
       $condition = inline_conditions_get_info($value['condition_name']);
       // Ensure we got the condition and we have settings for the rule
@@ -572,12 +580,10 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
         continue;
       }
 
-      $rule->condition(
-        $value['condition_name'], array(
-          'entity:select'      => $condition['entity type'],
-          'condition_settings' => serialize($value['condition_settings']),
-        )
-      );
+      // Fullfil the parameters variable with the correct values.
+      $parameters = array('entity:select' => $condition['entity type']) + $value['condition_settings'];
+
+      $rule->condition($value['condition_name'], $parameters);
     }
   }
 }
