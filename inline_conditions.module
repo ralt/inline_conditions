@@ -48,14 +48,14 @@ function inline_conditions_hook_info() {
  * Assumes "tag mode" (multiple allowed entries).
  * Mostly stolen from entityreference.
  *
- * @param string  $entity_type
+ * @param string $entity_type
  *   The entity type.
  * @param boolean $product_mode
- *   Boolean indicating whether to limit nodes to product display nodes, and
- *   taxonomy terms to vocabularies used by product display nodes.
+ *   Boolean indicating whether to limit taxonomy terms to vocabularies used by
+ *   commerce_product bundles.
  * @param boolean $single
  *   Indicate a single value autocomple field.
- * @param string  $string
+ * @param string $string
  *   The label of the entity to query by.
  */
 function inline_conditions_autocomplete_callback($entity_type, $product_mode, $single = FALSE, $string = '') {
@@ -107,10 +107,9 @@ function inline_conditions_autocomplete_callback($entity_type, $product_mode, $s
       // product display node types.
       $vids = array();
       $vocabulary_data = taxonomy_vocabulary_get_names();
-      foreach ($product_node_types as $type) {
-        $instances = field_info_instances('node', $type);
-        foreach ($instances as $instance) {
-          $field = field_info_field($instance['field_name']);
+      foreach (field_info_instances('commerce_product') as $instance) {
+        foreach ($instance as $field_name => $field_properties) {
+          $field = field_info_field($field_name);
           if ($field['type'] == 'taxonomy_term_reference') {
             $vocabulary_name = $field['settings']['allowed_values'][0]['vocabulary'];
             $vids[] = $vocabulary_data[$vocabulary_name]->vid;
@@ -384,11 +383,11 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
   define('ADD_CONDITION', 1);
 
   $element = array(
-    '#type' => 'container',
-    '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
-    '#suffix' => '</div>',
-    '#element_validate' => array('inline_conditions_field_widget_form_validate'),
-  ) + $element;
+      '#type' => 'container',
+      '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
+      '#suffix' => '</div>',
+      '#element_validate' => array('inline_conditions_field_widget_form_validate'),
+    ) + $element;
 
   // Attach module cascade style sheet to inline_conditions_field_widget_form.
   $form['#attached']['css'][] = drupal_get_path('module', 'inline_conditions') . '/css/inline_conditions.css';
@@ -561,7 +560,7 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
  *
  * @param RulesReactionRule $rule
  *   The parent rule.
- * @param array             $field_values
+ * @param array $field_values
  *   An array of values from an inline_conditions field.
  *
  * @see hook_inline_conditions_prebuild_alter().

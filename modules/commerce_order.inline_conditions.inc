@@ -73,7 +73,7 @@ function commerce_order_inline_conditions_build_alter(&$value) {
     case 'commerce_order_has_specific_quantity_products':
       $entity_ids = array();
       foreach ($value['condition_settings']['products'] as $delta) {
-        $entity_ids[] = $delta['target_id'];
+        $entity_ids[] = reset($delta);
       }
       $products = commerce_product_load_multiple($entity_ids);
 
@@ -89,7 +89,7 @@ function commerce_order_inline_conditions_build_alter(&$value) {
 }
 
 /**
- * Configuration callback for inline_conditions_order_total.
+ * Configuration callback for commerce_order_compare_order_amount.
  *
  * @param array $settings
  *   An array of rules condition settings.
@@ -142,7 +142,7 @@ function commerce_order_compare_order_amount_configure($settings) {
 
 
 /**
- * Build callback for inline_conditions_order_total.
+ * Build callback for commerce_order_compare_order_amount.
  *
  * @param EntityDrupalWrapper $wrapper
  *   The wrapped entity given by the rule.
@@ -252,12 +252,12 @@ function commerce_order_has_owner_build(EntityDrupalWrapper $wrapper, $account) 
  *   Return a form element.
  */
 function commerce_order_contains_products_configure($settings) {
-  // Get product IDs from $settings.
+  // Get values from $settings.
   $default_value = '';
-  foreach ($settings['products'] as $delta => $target_id) {
-    $product = commerce_product_load($settings['products'][$delta]['target_id']);
-    $default_value .= $product->title . ' (' . $product->product_id . ')';
-    if ($target_id !== end($settings['products'])) {
+  foreach ($settings['products'] as $delta => $product_id) {
+    $product = commerce_product_load(reset($product_id));
+    $default_value .= $product->sku;
+    if ($product_id !== end($settings['products'])) {
       $default_value .= ', ';
     }
   }
@@ -270,8 +270,8 @@ function commerce_order_contains_products_configure($settings) {
     '#title_display' => 'invisible',
     '#default_value' => $default_value,
     '#required' => TRUE,
-    '#autocomplete_path' => 'inline_conditions/autocomplete/commerce_product/0/0',
-    '#element_validate' => array('_inline_conditions_autocomplete_validate'),
+    '#autocomplete_path' => 'commerce_product/autocomplete/commerce_product/0/0',
+    '#element_validate' => array('commerce_product_reference_autocomplete_validate'),
     '#suffix' => '<div class="condition-instructions">' . t('Select products when ordered make discount active.') . '</div>',
     '#attributes' => array('placeholder' => array(t('enter product name'))),
   );
@@ -319,10 +319,10 @@ function commerce_order_contains_products_build(EntityDrupalWrapper $wrapper, $p
 function commerce_order_has_specific_quantity_products_configure($settings) {
   // Get product IDs from $settings.
   $default_value = '';
-  foreach ($settings['products'] as $delta => $target_id) {
-    $product = commerce_product_load($settings['products'][$delta]['target_id']);
-    $default_value .= $product->title . ' (' . $product->product_id . ')';
-    if ($target_id !== end($settings['products'])) {
+  foreach ($settings['products'] as $delta => $product_id) {
+    $product = commerce_product_load(reset($product_id));
+    $default_value .= $product->sku;
+    if ($product_id !== end($settings['products'])) {
       $default_value .= ', ';
     }
   }
@@ -335,8 +335,8 @@ function commerce_order_has_specific_quantity_products_configure($settings) {
     '#title_display' => 'invisible',
     '#default_value' => $default_value,
     '#required' => TRUE,
-    '#autocomplete_path' => 'inline_conditions/autocomplete/commerce_product/0/0',
-    '#element_validate' => array('_inline_conditions_autocomplete_validate'),
+    '#autocomplete_path' => 'commerce_product/autocomplete/commerce_product/0/0',
+    '#element_validate' => array('commerce_product_reference_autocomplete_validate'),
     '#attributes' => array('placeholder' => array(t('enter product name'))),
   );
 

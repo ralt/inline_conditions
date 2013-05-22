@@ -10,18 +10,18 @@
 function commerce_product_inline_conditions_info() {
   $conditions = array();
 
-  $conditions['commerce_product_contains_specific_product'] = array(
-    'label' => t('Product'),
+  $conditions['commerce_product_contains_products'] = array(
+    'label' => t('Product(s)'),
     'entity type' => 'commerce_line_item',
     'callbacks' => array(
-      'configure' => 'commerce_product_contains_specific_product_configure',
-      'build' => 'commerce_product_contains_specific_product_build',
+      'configure' => 'commerce_product_contains_products_configure',
+      'build' => 'commerce_product_contains_products_build',
     ),
   );
 
   if (module_exists('taxonomy')) {
     $conditions['commerce_product_has_specified_terms'] = array(
-      'label' => t('Taxonomy term(s)'),
+      'label' => t('Product attributes'),
       'entity type' => 'commerce_line_item',
       'callbacks' => array(
         'configure' => 'commerce_product_has_specified_terms_configure',
@@ -49,16 +49,26 @@ function commerce_product_inline_conditions_build_alter(&$value) {
         }
       }
       break;
-    case 'commerce_product_contains_specific_product':
-      if($product = commerce_product_load($value['condition_settings']['sku'][0]['target_id'])) {
-        $value['condition_settings']['sku'] = $product->sku;
+    case 'commerce_product_contains_products':
+      $entity_ids = array();
+      foreach ($value['condition_settings']['products'] as $delta) {
+        $entity_ids[] = reset($delta);
+      }
+      $products = commerce_product_load_multiple($entity_ids);
+
+      $value['condition_settings']['products'] = '';
+      foreach ($products as $product) {
+        $value['condition_settings']['products'] .= $product->sku;
+        if ($product !== end($products)) {
+          $value['condition_settings']['products'] .= ', ';
+        }
       }
       break;
   }
 }
 
 /**
- * Configuration callback for commerce_product_contains_specific_product.
+ * Configuration callback for commerce_product_contains_products.
  *
  * @param array $settings
  *   Values for the form element.
@@ -66,12 +76,14 @@ function commerce_product_inline_conditions_build_alter(&$value) {
  * @return array
  *   Return a form element.
  */
-function commerce_product_contains_specific_product_configure($settings) {
-  // Check if a product_id is found in $settings var.
+function commerce_product_contains_products_configure($settings) {
   $default_value = '';
-  if (isset($settings['sku'][0]['target_id'])) {
-    $product = commerce_product_load($settings['sku'][0]['target_id']);
-    $default_value = $product->title . ' (' . $product->product_id . ')';
+  foreach ($settings['products'] as $delta => $product_id) {
+    $product = commerce_product_load(reset($product_id));
+    $default_value .= $product->sku;
+    if ($product_id !== end($settings['products'])) {
+      $default_value .= ', ';
+    }
   }
 
   $form = array();
@@ -82,8 +94,8 @@ function commerce_product_contains_specific_product_configure($settings) {
     '#title_display' => 'invisible',
     '#default_value' => $default_value,
     '#required' => TRUE,
-    '#autocomplete_path' => 'inline_conditions/autocomplete/commerce_product/0/1',
-    '#element_validate' => array('_inline_conditions_autocomplete_validate'),
+    '#autocomplete_path' => 'commerce_product/autocomplete/commerce_product/0/0',
+    '#element_validate' => array('commerce_product_reference_autocomplete_validate'),
     '#suffix' => '<div class="condition-instructions">' . t('The discount is active if the line item is a product with the selected SKU.') . '</div>',
   );
 
@@ -91,7 +103,7 @@ function commerce_product_contains_specific_product_configure($settings) {
 }
 
 /**
- * Build callback for commerce_product_contains_specific_product.
+ * Build callback for commerce_product_contains_products.
  *
  * @param EntityDrupalWrapper $wrapper
  *   Wrapped entity type given by the rule.
@@ -101,7 +113,7 @@ function commerce_product_contains_specific_product_configure($settings) {
  * @return boolean
  *   True if condition is valid. false otherwise.
  */
-function commerce_product_contains_specific_product_build(EntityDrupalWrapper $wrapper, $sku) {
+function commerce_product_contains_products_build(EntityDrupalWrapper $wrapper, $sku) {
   if ($wrapper->getBundle() == 'product') {
     return ($wrapper->commerce_product->sku->value() == $sku);
   }
@@ -170,8 +182,17 @@ function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper
     }
 
     foreach ($term_fields as $term_field) {
-      foreach ($wrapper->commerce_product->$term_field as $term) {
-        if (($key = array_search($term->getIdentifier(), $terms_name)) !== FALSE) {
+      // If the wrapped field is an instance of EntityListWrapper class, that
+      // means that field contains multiple values.
+      if ($wrapper->commerce_product->$term_field instanceof EntityListWrapper) {
+        foreach ($wrapper->commerce_product->$term_field as $wrapper_term) {
+          if (($key = array_search($wrapper_term->getIdentifier(), $terms_name)) !== FALSE) {
+            unset($terms_name[$key]);
+          }
+        }
+      } else {
+        $term = $wrapper->commerce_product->$term_field->value();
+        if (($key = array_search($term->tid, $terms_name)) !== FALSE) {
           unset($terms_name[$key]);
         }
       }
@@ -189,7 +210,7 @@ function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper
 function commerce_product_rules_condition_info_alter(&$conditions) {
   $inline_conditions = inline_conditions_get_info();
 
-  $conditions['commerce_product_contains_specific_product'] = array(
+  $conditions['commerce_product_contains_products'] = array(
     'label' => t('Line item contains a specific product'),
     'parameter' => array(
       'commerce_line_item' => array(
@@ -201,13 +222,13 @@ function commerce_product_rules_condition_info_alter(&$conditions) {
       'sku' => array(
         'type' => 'text',
         'label' => t('SKU'),
-        'description' => t('Enter the product SKU to compare against the passed product line item.'),
+        'description' => t('Enter a comma-separated list of product SKU(s) to compare against the passed product line item.'),
       ),
     ),
     'module' => 'commerce_line_item',
     'group' => t('Commerce Line Item'),
     'callbacks' => array(
-      'execute' => $inline_conditions['commerce_product_contains_specific_product']['callbacks']['build'],
+      'execute' => $inline_conditions['commerce_product_contains_products']['callbacks']['build'],
     ),
   );
 
