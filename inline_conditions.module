@@ -302,7 +302,7 @@ function inline_conditions_field_load($entity_type, $entities, $field, $instance
 /**
  * Implements hook_field_insert().
  *
- * Call inline_conditions_prepare_field_items() in order to re-struturize items.
+ * Call inline_conditions_prepare_field_items() in order to rebuild items.
  *
  * @see inline_conditions_field_prepare_items()
  */
@@ -316,7 +316,7 @@ function inline_conditions_field_insert($entity_type, $entity, $field, $instance
 /**
  * Implements hook_field_update().
  *
- * Call inline_conditions_prepare_field_items() in order to re-struturize items.
+ * Call inline_conditions_prepare_field_items() in order to rebuild items.
  *
  * @see inline_conditions_field_prepare_items()
  */
@@ -364,7 +364,6 @@ function inline_conditions_field_prepare_items(&$items) {
   }
 }
 
-
 /**
  * Implements hook_field_widget_form().
  */
@@ -379,9 +378,6 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     $condition_list[$condition_name] = $info['label'];
   }
 
-  define('REMOVE_CONDITION', 0);
-  define('ADD_CONDITION', 1);
-
   $element = array(
       '#type' => 'container',
       '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
@@ -392,13 +388,9 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
   // Attach module cascade style sheet to inline_conditions_field_widget_form.
   $form['#attached']['css'][] = drupal_get_path('module', 'inline_conditions') . '/css/inline_conditions.css';
 
-  if (empty($items)) {
-    $items[] = array('condition_name' => '', 'condition_settings' => array());
-  }
-
   // If "Add a new condition" button has been pressed.
   if (isset($form_state['triggering_element']['#condition_action'])) {
-    if ($form_state['triggering_element']['#condition_action'] == ADD_CONDITION) {
+    if ($form_state['triggering_element']['#condition_action'] == 'add') {
       // Ensure we are on the right row.
       $items[] = array(
         'condition_name' => '',
@@ -406,7 +398,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
       );
     }
     // If "Remove" button has been pressed.
-    elseif ($form_state['triggering_element']['#condition_action'] == REMOVE_CONDITION) {
+    elseif ($form_state['triggering_element']['#condition_action'] == 'remove') {
       $condition_id = $form_state['triggering_element']['#element_delta'];
       unset($items[$condition_id]);
       // Rebuild array keys.
@@ -414,6 +406,9 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     }
   }
 
+  if (empty($items)) {
+    $items[] = array('condition_name' => '', 'condition_settings' => array());
+  }
 
   foreach ($items as $delta => $item) {
     $condition_name = $item['condition_name'];
@@ -434,8 +429,9 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
         'callback' => 'inline_conditions_form_ajax_callback',
         'wrapper' => $id,
       ),
+      '#condition_action' => 'select',
       // Identifies the condition operated upon.
-      '#condition_id' => $delta,
+      '#element_delta' => $delta,
     );
     $element[$delta]['condition_settings'] = array(
       '#type' => 'value',
@@ -447,9 +443,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
       $callback = $condition_info[$condition_name]['callbacks']['configure'];
       $element[$delta]['condition_settings'] = $callback($condition_settings);
       $element[$delta]['#attributes'] = array('class' => array('container-inline'));
-    }
 
-    if ($delta > 0) {
       $element[$delta]['remove_condition'] = array(
         '#type' => 'button',
         '#name' => $field['field_name'] . '-' . $instance['id'] . '-' . $delta . '-remove_condition',
@@ -460,15 +454,17 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
           'effect' => 'fade',
         ),
         '#element_delta' => $delta,
-        '#condition_action' => 0,
+        '#condition_action' => 'remove',
         '#executes_submit_callback' => FALSE,
         '#limit_validation_errors' => array(),
       );
 
-      $element[$delta]['condition_name']['#title_display'] = 'invisible';
-      $element[$delta - 1]['and'] = array(
-        '#markup' => '<div style="display: block;"><i>AND</i></div>',
-      );
+      if ($delta > 0) {
+        $element[$delta]['condition_name']['#title_display'] = 'invisible';
+        $element[$delta - 1]['and'] = array(
+          '#markup' => '<div style="display: block;"><i>AND</i></div>',
+        );
+      }
     }
   }
 
@@ -483,7 +479,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
       'effect' => 'fade',
     ),
     '#element_delta' => $element['#delta'],
-    '#condition_action' => 1,
+    '#condition_action' => 'add',
   );
 
   return $element;
@@ -524,6 +520,12 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
  *   Return a boolean to validate or not form elements.
  */
 function inline_conditions_field_widget_form_validate($element, &$form_state, $form) {
+  // Support removing the conditions from the entity.
+  if (isset($form_state['triggering_element']['#condition_action']) && $form_state['triggering_element']['#condition_action'] == 'remove') {
+    $element['#parents'][] = $form_state['triggering_element']['#element_delta'];
+    drupal_array_set_nested_value($form_state['values'], $element['#parents'], array(), TRUE);
+    drupal_array_set_nested_value($form_state['input'], $element['#parents'], array(), TRUE);
+  }
 }
 
 /**
@@ -542,10 +544,9 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
   $element = drupal_array_get_nested_value($form, $element_parents);
 
   // Triggered when user selects a condition.
-  if (isset($form_state['triggering_element']['#condition_id'])) {
-    $condition_id = $form_state['triggering_element']['#condition_id'];
-
-    return $element[$condition_id];
+  if ($form_state['triggering_element']['#condition_action'] == 'select') {
+    $delta = $form_state['triggering_element']['#element_delta'];
+    return $element[$delta];
   }
   else {
     return $element;

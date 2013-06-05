@@ -77,20 +77,22 @@ function commerce_product_inline_conditions_build_alter(&$value) {
  *   Return a form element.
  */
 function commerce_product_contains_products_configure($settings) {
+  $form = array();
   $default_value = '';
-  foreach ($settings['products'] as $delta => $product_id) {
-    $product = commerce_product_load(reset($product_id));
-    $default_value .= $product->sku;
-    if ($product_id !== end($settings['products'])) {
-      $default_value .= ', ';
+
+  if (!empty($settings)) {
+    foreach ($settings['products'] as $delta => $product_id) {
+      $product = commerce_product_load(reset($product_id));
+      $default_value .= $product->sku;
+      if ($product_id !== end($settings['products'])) {
+        $default_value .= ', ';
+      }
     }
   }
 
-  $form = array();
-
-  $form['sku'] = array(
+  $form['products'] = array(
     '#type' => 'textfield',
-    '#title' => t('SKU'),
+    '#title' => t('Product title'),
     '#title_display' => 'invisible',
     '#default_value' => $default_value,
     '#required' => TRUE,
