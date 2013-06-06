@@ -443,28 +443,29 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
       $callback = $condition_info[$condition_name]['callbacks']['configure'];
       $element[$delta]['condition_settings'] = $callback($condition_settings);
       $element[$delta]['#attributes'] = array('class' => array('container-inline'));
+    }
 
-      $element[$delta]['remove_condition'] = array(
-        '#type' => 'button',
-        '#name' => $field['field_name'] . '-' . $instance['id'] . '-' . $delta . '-remove_condition',
-        '#value' => t('Remove'),
-        '#ajax' => array(
-          'callback' => 'inline_conditions_form_ajax_callback',
-          'wrapper' => 'inline-conditions-' . $field['field_name'],
-          'effect' => 'fade',
-        ),
-        '#element_delta' => $delta,
-        '#condition_action' => 'remove',
-        '#executes_submit_callback' => FALSE,
-        '#limit_validation_errors' => array(),
+    // Adds the remove condition button.
+    $element[$delta]['remove_condition'] = array(
+      '#type' => 'button',
+      '#name' => $field['field_name'] . '-' . $instance['id'] . '-' . $delta . '-remove_condition',
+      '#value' => t('Remove'),
+      '#ajax' => array(
+        'callback' => 'inline_conditions_form_ajax_callback',
+        'wrapper' => 'inline-conditions-' . $field['field_name'],
+        'effect' => 'fade',
+      ),
+      '#element_delta' => $delta,
+      '#condition_action' => 'remove',
+      '#executes_submit_callback' => FALSE,
+      '#limit_validation_errors' => array(),
+    );
+
+    if ($delta > 0) {
+      $element[$delta]['condition_name']['#title_display'] = 'invisible';
+      $element[$delta - 1]['and'] = array(
+        '#markup' => '<div style="display: block;"><i>AND</i></div>',
       );
-
-      if ($delta > 0) {
-        $element[$delta]['condition_name']['#title_display'] = 'invisible';
-        $element[$delta - 1]['and'] = array(
-          '#markup' => '<div style="display: block;"><i>AND</i></div>',
-        );
-      }
     }
   }
 
