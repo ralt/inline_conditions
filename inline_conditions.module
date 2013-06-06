@@ -50,10 +50,10 @@ function inline_conditions_hook_info() {
  *
  * @param string $entity_type
  *   The entity type.
- * @param boolean $product_mode
+ * @param bool $product_mode
  *   Boolean indicating whether to limit taxonomy terms to vocabularies used by
  *   commerce_product bundles.
- * @param boolean $single
+ * @param bool $single
  *   Indicate a single value autocomple field.
  * @param string $string
  *   The label of the entity to query by.
@@ -379,11 +379,11 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
   }
 
   $element = array(
-      '#type' => 'container',
-      '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . t($element['#title']) . '</label>',
-      '#suffix' => '</div>',
-      '#element_validate' => array('inline_conditions_field_widget_form_validate'),
-    ) + $element;
+    '#type' => 'container',
+    '#prefix' => '<div class="inline-conditions-container" id="inline-conditions-' . $field['field_name'] . '"><label>' . $element['#title'] . '</label>',
+    '#suffix' => '</div>',
+    '#element_validate' => array('inline_conditions_field_widget_form_validate'),
+  ) + $element;
 
   // Attach module cascade style sheet to inline_conditions_field_widget_form.
   $form['#attached']['css'][] = drupal_get_path('module', 'inline_conditions') . '/css/inline_conditions.css';
@@ -516,7 +516,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
  *   The form structure where widgets are being attached to. This might be a
  *   full form structure, or a sub-element of a larger form.
  *
- * @return boolean
+ * @return bool
  *   Return a boolean to validate or not form elements.
  */
 function inline_conditions_field_widget_form_validate($element, &$form_state, $form) {
@@ -564,7 +564,7 @@ function inline_conditions_form_ajax_callback($form, &$form_state) {
  * @param array $field_values
  *   An array of values from an inline_conditions field.
  *
- * @see hook_inline_conditions_prebuild_alter().
+ * @see hook_inline_conditions_prebuild_alter()
  */
 function inline_conditions_build(RulesReactionRule $rule, $field_values) {
   if (!empty($field_values)) {
@@ -625,6 +625,8 @@ function inline_conditions_get_info($condition_name = NULL) {
 }
 
 /**
+ * Get inline conditions per type.
+ *
  * Return an array of defined inline conditions for the passed entity type and
  * component type (if specified by the condition).
  *

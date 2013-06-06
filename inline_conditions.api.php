@@ -56,7 +56,7 @@ function hook_inline_conditions_info_alter(&$conditions) {
 /**
  * Alter fields values before building the rule.
  *
- * @see inline_conditions_build().
+ * @see inline_conditions_build()
  */
 function hook_inline_conditions_build_alter(&$value) {
   foreach ($field_values as &$value) {

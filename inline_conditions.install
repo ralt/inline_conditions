@@ -54,14 +54,3 @@ function inline_conditions_disable() {
   // Run the cron job.
   drupal_cron_run();
 }
-
-/**
- * Implements hook_uninstall().
- *
- * @see hook_install()
- * @see hook_schema()
- * @see hook_disable()
- * @see hook_modules_uninstalled()
- */
-function inline_conditions_uninstall() {
-}

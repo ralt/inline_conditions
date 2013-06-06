@@ -49,6 +49,7 @@ function commerce_product_inline_conditions_build_alter(&$value) {
         }
       }
       break;
+
     case 'commerce_product_contains_products':
       $entity_ids = array();
       foreach ($value['condition_settings']['products'] as $delta) {
@@ -64,6 +65,7 @@ function commerce_product_inline_conditions_build_alter(&$value) {
         }
       }
       break;
+
   }
 }
 
@@ -112,7 +114,7 @@ function commerce_product_contains_products_configure($settings) {
  * @param array $sku
  *   Product sku returned by rule condition.
  *
- * @return boolean
+ * @return bool
  *   True if condition is valid. false otherwise.
  */
 function commerce_product_contains_products_build(EntityDrupalWrapper $wrapper, $sku) {
@@ -167,7 +169,7 @@ function commerce_product_has_specified_terms_configure($settings) {
  * @param array $terms
  *   Values for the condition settings.
  *
- * @return boolean
+ * @return bool
  *   True is condition is valid. false otherwise.
  */
 function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper, $terms) {
@@ -192,7 +194,8 @@ function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper
             unset($terms_name[$key]);
           }
         }
-      } else {
+      }
+      else {
         $term = $wrapper->commerce_product->$term_field->value();
         if (($key = array_search($term->tid, $terms_name)) !== FALSE) {
           unset($terms_name[$key]);

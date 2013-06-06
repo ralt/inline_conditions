@@ -151,7 +151,7 @@ function commerce_order_compare_order_amount_configure($settings) {
  * @param array $total
  *   A commerce_price type array.
  *
- * @return boolean
+ * @return bool
  *   return true if condition is valid. false otherwise.
  */
 function commerce_order_compare_order_amount_build(EntityDrupalWrapper $wrapper, $operator, $total) {
@@ -166,16 +166,15 @@ function commerce_order_compare_order_amount_build(EntityDrupalWrapper $wrapper,
   switch ($operator) {
     case '<':
       return $total_order['amount'] <= $total['amount'];
-      break;
+
     case '==':
       return $total_order['amount'] == $total['amount'];
-      break;
+
     case '>':
       return $total_order['amount'] >= $total['amount'];
-      break;
+
     default:
       return FALSE;
-      break;
   }
 }
 
@@ -230,7 +229,7 @@ function _commerce_order_has_owner_validate($element, &$form_state, $form) {
  * @param array $account
  *   A fully loaded drupal user.
  *
- * @return boolean
+ * @return bool
  *   Returns true if condition is valid. false otherwise.
  */
 function commerce_order_has_owner_build(EntityDrupalWrapper $wrapper, $account) {
@@ -381,7 +380,7 @@ function commerce_order_has_specific_quantity_products_configure($settings) {
  * @param int $quantity
  *   Product quantity.
  *
- * @return boolean
+ * @return bool
  *   True if the condition is valid. False otherwise.
  */
 function commerce_order_has_specific_quantity_products_build(EntityDrupalWrapper $wrapper, $products, $operator, $quantity) {
@@ -403,6 +402,7 @@ function commerce_order_has_specific_quantity_products_build(EntityDrupalWrapper
               return FALSE;
             }
             break;
+
           case '==':
             if ($wrapper_line_item->quantity->value() == $quantity) {
               unset($products_sku[$key]);
@@ -411,6 +411,7 @@ function commerce_order_has_specific_quantity_products_build(EntityDrupalWrapper
               return FALSE;
             }
             break;
+
           case '>':
             if ($wrapper_line_item->quantity->value() > $quantity) {
               unset($products_sku[$key]);
@@ -419,6 +420,7 @@ function commerce_order_has_specific_quantity_products_build(EntityDrupalWrapper
               return FALSE;
             }
             break;
+
         }
       }
     }
@@ -455,8 +457,9 @@ function commerce_shipping_compare_shipping_service_configure($settings) {
 }
 
 /**
- * Validation callback for a commerce_shipping_compare_shipping_service
- * autocomplete element.
+ * Element validation callback.
+ *
+ * Ensures passed element is a valid commerce shipping service.
  */
 function _commerce_shipping_compare_shipping_service_validate($element, &$form_state, $form) {
   $shipping_services = commerce_shipping_services();
@@ -572,8 +575,8 @@ function commerce_order_rules_condition_info_alter(&$conditions) {
       'quantity' => array(
         'type' => 'integer',
         'label' => t('Quantity'),
-        'description' => t('Quantity value to be compared against each selected product(s).')
-      )
+        'description' => t('Quantity value to be compared against each selected product(s).'),
+      ),
     ),
     'module' => 'commerce_order',
     'group' => t('Commerce Order'),
