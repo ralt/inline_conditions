@@ -3,5 +3,3 @@ description = Manage frequently used conditions through an attached field.
 package = Rules
 core = 7.x
 dependencies[] = rules
-dependencies[] = commerce (>= 7.x-1.4)
-dependencies[] = commerce_product_reference (>= 7.x-1.4)
