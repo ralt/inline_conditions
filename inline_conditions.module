@@ -481,6 +481,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     ),
     '#element_delta' => $element['#delta'],
     '#condition_action' => 'add',
+    '#limit_validation_errors' => array(),
   );
 
   return $element;

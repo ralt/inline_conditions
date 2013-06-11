@@ -98,7 +98,7 @@ function commerce_product_contains_products_configure($settings) {
     '#title_display' => 'invisible',
     '#default_value' => $default_value,
     '#required' => TRUE,
-    '#autocomplete_path' => 'commerce_product/autocomplete/commerce_product/0',
+    '#autocomplete_path' => 'commerce_product/autocomplete/commerce_product/0/0',
     '#element_validate' => array('commerce_product_reference_autocomplete_validate'),
     '#suffix' => '<div class="condition-instructions">' . t('The discount is active if the line item is a product with the selected SKU.') . '</div>',
   );
