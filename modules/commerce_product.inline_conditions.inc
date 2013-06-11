@@ -52,16 +52,16 @@ function commerce_product_inline_conditions_build_alter(&$value) {
 
     case 'commerce_product_contains_products':
       $entity_ids = array();
-      foreach ($value['condition_settings']['products'] as $delta) {
+      foreach ($value['condition_settings']['sku'] as $delta) {
         $entity_ids[] = reset($delta);
       }
       $products = commerce_product_load_multiple($entity_ids);
 
-      $value['condition_settings']['products'] = '';
+      $value['condition_settings']['sku'] = '';
       foreach ($products as $product) {
-        $value['condition_settings']['products'] .= $product->sku;
+        $value['condition_settings']['sku'] .= $product->sku;
         if ($product !== end($products)) {
-          $value['condition_settings']['products'] .= ', ';
+          $value['condition_settings']['sku'] .= ', ';
         }
       }
       break;
@@ -83,16 +83,16 @@ function commerce_product_contains_products_configure($settings) {
   $default_value = '';
 
   if (!empty($settings)) {
-    foreach ($settings['products'] as $delta => $product_id) {
+    foreach ($settings['sku'] as $delta => $product_id) {
       $product = commerce_product_load(reset($product_id));
       $default_value .= $product->sku;
-      if ($product_id !== end($settings['products'])) {
+      if ($product_id !== end($settings['sku'])) {
         $default_value .= ', ';
       }
     }
   }
 
-  $form['products'] = array(
+  $form['sku'] = array(
     '#type' => 'textfield',
     '#title' => t('Product title'),
     '#title_display' => 'invisible',
