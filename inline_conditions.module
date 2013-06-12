@@ -29,6 +29,21 @@ function inline_conditions_menu() {
 }
 
 /**
+ * Implements hook_modules_enabled().
+ */
+function inline_conditions_modules_enabled() {
+  // New modules might offer additional inline conditions.
+  drupal_static_reset('inline_conditions_get_info');
+}
+
+/**
+ * Implements hook_modules_disabled().
+ */
+function inline_conditions_modules_disabled() {
+  drupal_static_reset('inline_conditions_get_info');
+}
+
+/**
  * Implements hook_hook_info().
  */
 function inline_conditions_hook_info() {

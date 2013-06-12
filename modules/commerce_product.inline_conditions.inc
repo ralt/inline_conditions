@@ -237,25 +237,27 @@ function commerce_product_rules_condition_info_alter(&$conditions) {
     ),
   );
 
-  $conditions['commerce_product_has_specified_terms'] = array(
-    'label' => t('Line item contains specific terms ID'),
-    'parameter' => array(
-      'commerce_line_item' => array(
-        'type' => 'commerce_line_item',
-        'label' => t('Line item'),
-        'description' => t('The line item.'),
-        'wrapped' => TRUE,
+  if (module_exists('taxonomy')) {
+    $conditions['commerce_product_has_specified_terms'] = array(
+      'label' => t('Line item contains specific terms ID'),
+      'parameter' => array(
+        'commerce_line_item' => array(
+          'type' => 'commerce_line_item',
+          'label' => t('Line item'),
+          'description' => t('The line item.'),
+          'wrapped' => TRUE,
+        ),
+        'terms' => array(
+          'type' => 'text',
+          'label' => t('Terms ID'),
+          'description' => t('Enter a comma-separated list of term ID to compare against the passed product line item.'),
+        ),
       ),
-      'terms' => array(
-        'type' => 'text',
-        'label' => t('Terms ID'),
-        'description' => t('Enter a comma-separated list of term ID to compare against the passed product line item.'),
+      'module' => 'commerce_line_item',
+      'group' => t('Commerce Line Item'),
+      'callbacks' => array(
+        'execute' => $inline_conditions['commerce_product_has_specified_terms']['callbacks']['build'],
       ),
-    ),
-    'module' => 'commerce_line_item',
-    'group' => t('Commerce Line Item'),
-    'callbacks' => array(
-      'execute' => $inline_conditions['commerce_product_has_specified_terms']['callbacks']['build'],
-    ),
-  );
+    );
+  }
 }
