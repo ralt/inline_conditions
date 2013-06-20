@@ -4,10 +4,15 @@
  * Manage frequently used conditions directly on the relevant form.
  */
 
-// Load local conditions files located into /modules folder.
-foreach (array('commerce_order', 'commerce_product') as $module) {
-  if (module_exists($module)) {
-    module_load_include('inc', 'inline_conditions', "modules/$module.inline_conditions");
+/**
+ * Implements hook_init().
+ */
+function inline_conditions_init() {
+  // Load local conditions files located into /modules folder.
+  foreach (array('commerce_order', 'commerce_product') as $module) {
+    if (module_exists($module)) {
+      module_load_include('inc', 'inline_conditions', "modules/$module.inline_conditions");
+    }
   }
 }
 
