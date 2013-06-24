@@ -2,39 +2,116 @@
 * inline_conditions main css file.
 */
 
-.inline-conditions-container {
-    margin: 15px 0 0 0;
+/**
+* Discount conditions block.
+*/
+.inline-conditions-container .form-wrapper {
+  margin: 10px;
+}
+.inline-conditions-container .even,
+.inline-conditions-container .odd {
+  margin-top: 2px;
+  padding: 10px 5px;
+}
+.inline-conditions-container .odd {
+  background-color: #eee;
 }
 
-.inline-conditions-container > label {
-    display: block;
-    border-bottom: 1px solid rgb(204, 204, 204);
-    width: 100%;
+/**
+* Condition area.
+*/
+.inline-conditions-container .condition-wrapper {
+  display: block;
+  float: left;
+  position: relative;
+}
+.inline-conditions-container .condition-wrapper .form-item label {
+  display: inline-block;
+  width: 80px;
+}
+/* Throbber */
+.inline-conditions-container .condition-wrapper .form-item .ajax-progress {
+  position: absolute;
+  left: 62px;
+}
+.inline-conditions-container .condition-wrapper .form-item .ajax-progress .message {
+  display: none;
+}
+.inline-conditions-container .remove-condition {
+  position: relative;
+}
+.inline-conditions-container .remove-condition .form-submit {
+  float: left;
+  margin: 0 10px;
+}
+.inline-conditions-container .remove-condition .ajax-progress .message {
+  float: left;
+  padding-left: 5px;
 }
 
+
+/* order conditions */
 .inline-conditions-container .form-item {
-    margin: 0;
+  margin: 0;
 }
-
 .inline-conditions-container .form-submit {
-   margin: 10px 0 0 0;
+  margin: 0;
 }
-
+.inline-conditions-container .form-submit.add-new-condition {
+  margin-top: 10px;
+}
 .inline-conditions-container div.condition-instructions {
-    color: #6d6d6d;
-    font-style: italic;
-    display: block;
-    font-size: smaller;
+  color: #6d6d6d;
+  font-style: italic;
+  display: block;
+  font-size: smaller;
+  margin-left: 85px; /* Equal to .inline-conditions-container .condition-wrapper label width+5px */
 }
 
 .inline-conditions-container .product-taxonomy .form-type-radio {
-    display: block;
-    margin: 0;
-    padding: 0;
+  display: block;
+  margin: 0;
+  padding: 0;
 }
 
 .inline-conditions-container .product-taxonomy .form-type-radio > label {
-    color: #6d6d6d;
-    font-style: italic;
-    font-size: smaller;
+  color: #6d6d6d;
+  font-style: italic;
+  font-size: smaller;
+}
+
+/* Order condition label */
+#commerce-discount-fields-wrapper .form-wrapper div.inline-conditions-container > label {
+  border-bottom: 1px solid #ccc;
+  display: block;
+  width: 100%;
+}
+/*#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price*/
+
+#commerce-discount-fields-wrapper > .form-wrapper div.form-radios,
+#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price,
+#commerce-discount-fields-wrapper > .form-wrapper div.field-name-commerce-percentage {
+  float: left;
+}
+#commerce-discount-fields-wrapper > .form-wrapper div.form-radios {
+  border-right: 1px dotted #ccc;
+  padding-right: 20px;
+}
+.field-name-commerce-discount-date {
+  clear: both;
+}
+
+
+/* general block margins */
+#commerce-discount-fields-wrapper > .form-wrapper {
+  margin-bottom: 15px;
+}
+#commerce-discount-fields-wrapper > .form-wrapper div#edit-commerce-discount-fields-commerce-discount-ic-order-und,
+#commerce-discount-fields-wrapper > .form-wrapper div.form-radios,
+#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price,
+#commerce-discount-fields-wrapper > .form-wrapper div.field-name-commerce-percentage,
+#commerce-discount-fields-wrapper > .form-wrapper div.fieldset-wrapper {
+  background-color: transparent;
+  margin: 10px;
+  padding: 4px;
 }

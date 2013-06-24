@@ -429,15 +429,15 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
   if (empty($items)) {
     $items[] = array('condition_name' => '', 'condition_settings' => array());
   }
-
+  $zebra = 0;
   foreach ($items as $delta => $item) {
     $condition_name = $item['condition_name'];
     $condition_settings = $item['condition_settings'];
-
+    $zebra_class = ($delta % 2) ? 'odd' : 'even';
     $id = 'inline-conditions-' . $field['field_name'] . '-' . $instance['id'] . '-' . $delta;
     $element[$delta] = array(
       '#type' => 'container',
-      '#prefix' => '<div id="' . $id . '">',
+      '#prefix' => '<div id="' . $id . '" class="container-inline ' . $field['field_name'] . ' ' . $zebra_class . ' clearfix">',
       '#suffix' => '</div>',
     );
     $element[$delta]['condition_name'] = array(
@@ -449,10 +449,13 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
         'callback' => 'inline_conditions_form_ajax_callback',
         'wrapper' => $id,
       ),
+      '#prefix' => '<div class="condition-wrapper">',
+
       '#condition_action' => 'select',
       // Identifies the condition operated upon.
       '#element_delta' => $delta,
     );
+
     $element[$delta]['condition_settings'] = array(
       '#type' => 'value',
       '#value' => array(),
@@ -475,6 +478,9 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
         'wrapper' => 'inline-conditions-' . $field['field_name'],
         'effect' => 'fade',
       ),
+      // closing condition-wrapper div.
+      '#prefix' => '</div><div class="remove-condition">',
+      '#suffix' => '</div>',
       '#element_delta' => $delta,
       '#condition_action' => 'remove',
       '#executes_submit_callback' => FALSE,
@@ -482,10 +488,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     );
 
     if ($delta > 0) {
-      $element[$delta]['condition_name']['#title_display'] = 'invisible';
-      $element[$delta - 1]['and'] = array(
-        '#markup' => '<div style="display: block;"><i>AND</i></div>',
-      );
+      $element[$delta]['condition_name']['#title'] = t('And: ');
     }
   }
 
@@ -499,6 +502,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
       'wrapper' => 'inline-conditions-' . $field['field_name'],
       'effect' => 'fade',
     ),
+    '#attributes' => array('class' => array('add-new-condition')),
     '#element_delta' => $element['#delta'],
     '#condition_action' => 'add',
     '#limit_validation_errors' => array(),
