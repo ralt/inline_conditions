@@ -22,7 +22,7 @@
 */
 .inline-conditions-container .condition-wrapper {
   display: block;
-  float: left;
+  float: left; /* LTR */
   position: relative;
 }
 .inline-conditions-container .condition-wrapper .form-item label {
@@ -32,7 +32,7 @@
 /* Throbber */
 .inline-conditions-container .condition-wrapper .form-item .ajax-progress {
   position: absolute;
-  left: 62px;
+  left: 62px; /* LTR */
 }
 .inline-conditions-container .condition-wrapper .form-item .ajax-progress .message {
   display: none;
@@ -41,14 +41,13 @@
   position: relative;
 }
 .inline-conditions-container .remove-condition .form-submit {
-  float: left;
+  float: left; /* LTR */
   margin: 0 10px;
 }
 .inline-conditions-container .remove-condition .ajax-progress .message {
-  float: left;
-  padding-left: 5px;
+  float: left; /* LTR */
+  padding-left: 5px; /* LTR */
 }
-
 
 /* order conditions */
 .inline-conditions-container .form-item {
@@ -65,53 +64,16 @@
   font-style: italic;
   display: block;
   font-size: smaller;
-  margin-left: 85px; /* Equal to .inline-conditions-container .condition-wrapper label width+5px */
+  /* Equal to ..inline-conditions-container .condition-wrapper .form-item label width+5px */
+  margin-left: 85px; /* LTR */
 }
-
 .inline-conditions-container .product-taxonomy .form-type-radio {
   display: block;
   margin: 0;
   padding: 0;
 }
-
 .inline-conditions-container .product-taxonomy .form-type-radio > label {
   color: #6d6d6d;
   font-style: italic;
   font-size: smaller;
-}
-
-/* Order condition label */
-#commerce-discount-fields-wrapper .form-wrapper div.inline-conditions-container > label {
-  border-bottom: 1px solid #ccc;
-  display: block;
-  width: 100%;
-}
-/*#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price*/
-
-#commerce-discount-fields-wrapper > .form-wrapper div.form-radios,
-#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price,
-#commerce-discount-fields-wrapper > .form-wrapper div.field-name-commerce-percentage {
-  float: left;
-}
-#commerce-discount-fields-wrapper > .form-wrapper div.form-radios {
-  border-right: 1px dotted #ccc;
-  padding-right: 20px;
-}
-.field-name-commerce-discount-date {
-  clear: both;
-}
-
-
-/* general block margins */
-#commerce-discount-fields-wrapper > .form-wrapper {
-  margin-bottom: 15px;
-}
-#commerce-discount-fields-wrapper > .form-wrapper div#edit-commerce-discount-fields-commerce-discount-ic-order-und,
-#commerce-discount-fields-wrapper > .form-wrapper div.form-radios,
-#commerce-discount-fields-wrapper > .form-wrapper div.field-type-commerce-price,
-#commerce-discount-fields-wrapper > .form-wrapper div.field-name-commerce-percentage,
-#commerce-discount-fields-wrapper > .form-wrapper div.fieldset-wrapper {
-  background-color: transparent;
-  margin: 10px;
-  padding: 4px;
 }
