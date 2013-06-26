@@ -3,7 +3,7 @@
  * @file
  * Manage frequently used conditions directly on the relevant form.
  */
-
+inline_conditions_init();
 /**
  * Implements hook_init().
  */
