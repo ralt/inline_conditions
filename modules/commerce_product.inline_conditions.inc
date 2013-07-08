@@ -111,15 +111,15 @@ function commerce_product_contains_products_configure($settings) {
  *
  * @param EntityDrupalWrapper $wrapper
  *   Wrapped entity type given by the rule.
- * @param array $sku
- *   Product sku returned by rule condition.
+ * @param string $sku
+ *   Product sku(s) returned by rule condition.
  *
  * @return bool
  *   True if condition is valid. false otherwise.
  */
 function commerce_product_contains_products_build(EntityDrupalWrapper $wrapper, $sku) {
   if ($wrapper->getBundle() == 'product') {
-    return ($wrapper->commerce_product->sku->value() == $sku);
+    return in_array($wrapper->commerce_product->sku->value(), array_map('trim', explode(',', $sku)));
   }
 
   return FALSE;
