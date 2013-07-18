@@ -118,10 +118,10 @@ function commerce_product_contains_products_configure($settings) {
  *   True if condition is valid. false otherwise.
  */
 function commerce_product_contains_products_build(EntityDrupalWrapper $wrapper, $sku) {
-  if ($wrapper->getBundle() == 'product') {
+  // Only for Line items with Product reference field.
+  if (in_array('commerce_product', array_keys($wrapper->getPropertyInfo()))) {
     return in_array($wrapper->commerce_product->sku->value(), array_map('trim', explode(',', $sku)));
   }
-
   return FALSE;
 }
 
