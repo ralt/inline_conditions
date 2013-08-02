@@ -195,8 +195,7 @@ function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper
           }
         }
       }
-      else {
-        $term = $wrapper->commerce_product->$term_field->value();
+      elseif ($term = $wrapper->commerce_product->$term_field->value()) {
         if (($key = array_search($term->tid, $terms_name)) !== FALSE) {
           unset($terms_name[$key]);
         }
