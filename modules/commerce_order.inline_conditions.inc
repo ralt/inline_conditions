@@ -294,10 +294,9 @@ function commerce_order_contains_products_build(EntityDrupalWrapper $wrapper, $p
 
   $products_sku = explode(', ', (string) $products);
 
-  // Compare discount product ids with thoses of given order.
   foreach ($wrapper->commerce_line_items as $wrapper_line_item) {
-    // Ensures that the type of current line item is product.
-    if ($wrapper_line_item->getBundle() == 'product') {
+    // Ensures the passed line item is a product.
+    if (in_array('commerce_product', array_keys($wrapper_line_item->getPropertyInfo()))) {
       if (($key = array_search($wrapper_line_item->commerce_product->sku->value(), $products_sku)) !== FALSE) {
         unset($products_sku[$key]);
       }
@@ -390,7 +389,7 @@ function commerce_order_has_specific_quantity_products_build(EntityDrupalWrapper
   // Loop on order line items to check if each product has the quantity
   // specified in the rule settings.
   foreach ($wrapper->commerce_line_items as $wrapper_line_item) {
-    if ($wrapper_line_item->getBundle() == 'product') {
+    if (in_array('commerce_product', array_keys($wrapper_line_item->getPropertyInfo()))) {
       if (($key = array_search($wrapper_line_item->commerce_product->sku->value(), $products_sku)) !== FALSE) {
         // At this point, we are sure that the current product is in the order.
         // If this product line item doesn't meet the quantity comparison, the

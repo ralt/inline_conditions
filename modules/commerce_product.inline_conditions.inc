@@ -177,29 +177,23 @@ function commerce_product_has_specified_terms_configure($settings) {
 function commerce_product_has_specified_terms_build(EntityDrupalWrapper $wrapper, $terms) {
   $terms_name = explode(', ', $terms);
 
-  if ($wrapper->getBundle() == 'product') {
-    // Fetch all the fields name of taxonomy_term type for the current
-    // product type.
-    $term_fields = array();
+  if (in_array('commerce_product', array_keys($wrapper->getPropertyInfo()))) {
+    // Fetch all the fields name of taxonomy_term type for the passed entity.
     foreach ($wrapper->commerce_product->getPropertyInfo() as $field_name => $property) {
       if (preg_match('/taxonomy_term/', $property['type'])) {
-        $term_fields[] = $field_name;
-      }
-    }
-
-    foreach ($term_fields as $term_field) {
-      // If the wrapped field is an instance of EntityListWrapper class, that
-      // means that field contains multiple values.
-      if ($wrapper->commerce_product->$term_field instanceof EntityListWrapper) {
-        foreach ($wrapper->commerce_product->$term_field as $wrapper_term) {
-          if (($key = array_search($wrapper_term->getIdentifier(), $terms_name)) !== FALSE) {
-            unset($terms_name[$key]);
+        // If the wrapped field is an instance of EntityListWrapper class, that
+        // means that field contains multiple values.
+        if ($wrapper->commerce_product->$field_name instanceof EntityListWrapper) {
+          foreach ($wrapper->commerce_product->$field_name as $wrapper_term) {
+            if (($key = array_search($wrapper_term->getIdentifier(), $terms_name)) !== FALSE) {
+              unset($terms_name[$key]);
+            }
           }
         }
-      }
-      elseif ($term = $wrapper->commerce_product->$term_field->value()) {
-        if (($key = array_search($term->tid, $terms_name)) !== FALSE) {
-          unset($terms_name[$key]);
+        elseif ($term = $wrapper->commerce_product->$field_name->value()) {
+          if (($key = array_search($term->tid, $terms_name)) !== FALSE) {
+            unset($terms_name[$key]);
+          }
         }
       }
     }
@@ -240,7 +234,7 @@ function commerce_product_rules_condition_info_alter(&$conditions) {
 
   if (module_exists('taxonomy')) {
     $conditions['commerce_product_has_specified_terms'] = array(
-      'label' => t('Line item contains specific terms ID'),
+      'label' => t('Line item product contains specific terms ID'),
       'parameter' => array(
         'commerce_line_item' => array(
           'type' => 'commerce_line_item',
