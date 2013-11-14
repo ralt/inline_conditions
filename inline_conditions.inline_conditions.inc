@@ -164,12 +164,15 @@ function commerce_order_compare_order_amount_configure($settings) {
     '#type' => 'container',
     '#tree' => TRUE,
     '#element_validate' => array('commerce_price_field_widget_validate'),
-    '#suffix' => '<div class="condition-instructions">' . t('The discount is active only if the total order amount matches the condition above.') . '</div>',
+    '#suffix' => '<div class="condition-instructions">' . t(
+        'The discount is active only if the order total matches the above condition.
+              <br />(the other order discounts are not taken into the comparison process)'
+      ) . '</div>',
   );
 
   $form['total']['amount'] = array(
     '#type' => 'textfield',
-    '#title' => t('Order total'),
+    '#title' => t('Order subtotal'),
     '#title_display' => 'invisible',
     '#default_value' => commerce_currency_amount_to_decimal($settings['total']['amount'], $default_currency['code']),
     '#size' => 10,

@@ -182,23 +182,37 @@ function inline_conditions_rules_condition_info() {
  *   return true if condition is valid. false otherwise.
  */
 function commerce_order_compare_order_amount_build(EntityDrupalWrapper $wrapper, $operator, $total) {
-  // Get given total order amount.
-  $total_order = $wrapper->commerce_order_total->value();
+  $total_order = 0;
 
-  // Ensures currency codes match.
-  if ($total['currency_code'] != $total_order['currency_code']) {
+  // Ensure the discount currency code is the same than the order.
+  if ($wrapper->commerce_order_total->currency_code->value() != $total['currency_code']) {
     return FALSE;
+  }
+
+  // Get given total order amount.
+  foreach ($wrapper->commerce_line_items as $line_item_wrapper) {
+    if ($line_item_wrapper->getBundle() != 'commerce_discount') {
+      // Convert the line item's total to the order's currency for totalling.
+      $component_total = commerce_price_component_total($line_item_wrapper->commerce_total->value());
+
+      // Add the totals.
+      $total_order += commerce_currency_convert(
+        $component_total['amount'],
+        $component_total['currency_code'],
+        $total['currency_code']
+      );
+    }
   }
 
   switch ($operator) {
     case '<':
-      return $total_order['amount'] < $total['amount'];
+      return $total_order < $total['amount'];
 
     case '==':
-      return $total_order['amount'] == $total['amount'];
+      return $total_order == $total['amount'];
 
     case '>':
-      return $total_order['amount'] > $total['amount'];
+      return $total_order > $total['amount'];
 
     default:
       return FALSE;
@@ -332,6 +346,7 @@ function commerce_product_contains_products_build(EntityDrupalWrapper $wrapper, 
   if (in_array('commerce_product', array_keys($wrapper->getPropertyInfo()))) {
     return in_array($wrapper->commerce_product->sku->value(), array_map('trim', explode(',', $sku)));
   }
+
   return FALSE;
 }
 
