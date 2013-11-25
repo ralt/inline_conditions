@@ -244,9 +244,7 @@ function inline_conditions_field_property_callback(&$info, $entity_type, $field,
  */
 function inline_conditions_entity_metadata_field_property_get($entity, array $options, $name, $entity_type, $info) {
   $field = field_info_field($name);
-  $columns = array_keys($field['columns']);
-  $langcode = isset($options['language']) ? $options['language']->language : LANGUAGE_NONE;
-  $langcode = entity_metadata_field_get_language($entity_type, $entity, $field, $langcode, TRUE);
+  $langcode = entity_metadata_field_get_language($entity_type, $entity, $field, isset($options['language']) ? $options['language']->language : LANGUAGE_NONE, TRUE);
   $values = array();
   if (isset($entity->{$name}[$langcode])) {
     foreach ($entity->{$name}[$langcode] as $delta => $rows) {
@@ -267,13 +265,12 @@ function inline_conditions_entity_metadata_field_property_get($entity, array $op
  */
 function inline_conditions_entity_metadata_field_property_set($entity, $name, $value, $langcode, $entity_type) {
   $field = field_info_field($name);
-  $columns = array_keys($field['columns']);
   $langcode = entity_metadata_field_get_language($entity_type, $entity, $field, $langcode);
   $values = $field['cardinality'] == 1 ? array($value) : (array) $value;
 
   $items = array();
   foreach ($values as $delta => $value) {
-    if (isset($data)) {
+    if (isset($delta)) {
       $items[$delta] = $value;
     }
   }
