@@ -64,6 +64,14 @@ function inline_conditions_inline_conditions_info() {
         'build' => 'commerce_product_contains_products_build',
       ),
     );
+    $conditions['commerce_product_has_type'] = array(
+      'label' => t('Product type'),
+      'entity type' => 'commerce_line_item',
+      'callbacks' => array(
+        'configure' => 'commerce_product_has_type_configure',
+        'build' => 'commerce_product_has_type_build',
+      ),
+    );
   }
 
   if (module_exists('taxonomy')) {
@@ -404,6 +412,46 @@ function commerce_product_contains_products_configure($settings) {
   );
 
   return $form;
+}
+
+/**
+ * Configuration callback for commerce_product_has_type.
+ *
+ * @param array $settings
+ *   Values for the form element.
+ *
+ * @return array
+ *   Return a form element.
+ */
+function commerce_product_has_type_configure($settings) {
+  $form = array();
+
+  $form['type'] = array(
+    '#type' => 'select',
+    '#multiple' => FALSE,
+    '#options' => commerce_product_type_options_list(),
+    '#title' => t('Product type'),
+    '#title_display' => 'invisible',
+    '#default_value' => !empty($settings['type']) ? $settings['type'] : FALSE,
+    '#require' => TRUE,
+    '#element_validate' => array('_commerce_product_has_type_validate'),
+    '#suffix' => '<div class="condition-instructions">' . t('The discount is active if the product has the type selected above.') . '</div>',
+  );
+
+  return $form;
+}
+
+/**
+ * Element validation callback.
+ *
+ * Ensures passed element is a valid commerce product type.
+ */
+function _commerce_product_has_type_validate($element, &$form_state, $form) {
+  $product_types = commerce_product_types();
+
+  if (!array_key_exists($element['#value'], $product_types)) {
+    form_set_error(implode('][', $element['#array_parents']), t('A correct product type must be selected'));
+  }
 }
 
 /**

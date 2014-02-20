@@ -139,6 +139,28 @@ function inline_conditions_rules_condition_info() {
         'execute' => $inline_conditions['commerce_product_contains_products']['callbacks']['build'],
       ),
     );
+    $conditions['commerce_product_has_type'] = array(
+      'label' => t('Line item contains a specific product type'),
+      'parameter' => array(
+        'commerce_line_item' => array(
+          'type' => 'commerce_line_item',
+          'label' => t('Line item'),
+          'description' => t('The line item.'),
+          'wrapped' => TRUE,
+        ),
+        'type' => array(
+          'type' => 'text',
+          'label' => t('Type'),
+          'description' => t('Enter the product type to compare against the passed product line item.'),
+          'options list' => 'commerce_product_type_options_list',
+        ),
+      ),
+      'module' => 'inline_conditions',
+      'group' => t('Commerce Line Item'),
+      'callbacks' => array(
+        'execute' => $inline_conditions['commerce_product_has_type']['callbacks']['build'],
+      ),
+    );
   }
 
   if (module_exists('taxonomy') && module_exists('commerce_product')) {
@@ -264,6 +286,25 @@ function commerce_order_contains_products_build(EntityDrupalWrapper $wrapper, $p
   }
 
   return empty($products_sku);
+}
+
+/**
+ * Build callback for commerce_product_has_type.
+ *
+ * @param EntityDrupalWrapper $wrapper
+ *   Wrapped entity type given by the rule.
+ * @param string $type
+ *   Product type returned by rule condition.
+ *
+ * @return bool
+ *   True if condition is valid. false otherwise.
+ */
+function commerce_product_has_type_build(EntityDrupalWrapper $wrapper, $type) {
+  // Only for Line items with Product reference field.
+  if (in_array('commerce_product', array_keys($wrapper->getPropertyInfo()))) {
+    return ($wrapper->commerce_product->type->value() == $type);
+  }
+  return FALSE;
 }
 
 /**
