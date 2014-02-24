@@ -48,6 +48,11 @@ function hook_inline_conditions_info() {
 
 /**
  * Alter the condition info.
+ *
+ * @param array $conditions
+ *   An array of inline conditions.
+ *
+ * @see hook_inline_conditions_info().
  */
 function hook_inline_conditions_info_alter(&$conditions) {
   $conditions['inline_conditions_order_total']['label'] = t('Order total over');
@@ -55,6 +60,9 @@ function hook_inline_conditions_info_alter(&$conditions) {
 
 /**
  * Alter fields values before building the rule.
+ *
+ * @param array $value
+ *   Current value found in an inline conditions field type.
  *
  * @see inline_conditions_build().
  */
