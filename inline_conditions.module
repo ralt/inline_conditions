@@ -644,6 +644,9 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
       // Fulfill the parameters variable with the expecting values.
       $parameters = array('entity:select' => $condition['entity type']) + $value['condition_settings'];
 
+      // Find the condition name in order to be attached on the passed rule.
+      $name = isset($condition['rule condition name']) ? $condition['rule condition name'] : $value['condition_name'];
+
       // Find out if we need to add a OR / AND condition before the one defined
       // in the current field value.
       if (isset($value['condition_logic_operator'])) {
@@ -653,7 +656,7 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
               $and = rules_and();
             }
             // Attach the condition in the "AND" group.
-            $and->condition($value['condition_name'], $parameters);
+            $and->condition($name, $parameters);
             // Try to add the condition stored in temp variable in the current
             // group.
             if (!is_null($temp)) {
@@ -666,7 +669,7 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
               $or = rules_or();
             }
             // Attach the condition in the "AND" group.
-            $or->condition($value['condition_name'], $parameters);
+            $or->condition($name, $parameters);
             // Try to add the condition stored in temp variable in the current
             // group.
             if (!is_null($temp)) {
@@ -681,7 +684,7 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
       // No logical operator found, so we put the condition in the temp array.
       // It will be added to next condition using a logical operator.
       $temp = array(
-        'name' => $value['condition_name'],
+        'name' => $name,
         'parameters' => $parameters
       );
     }
@@ -692,6 +695,12 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
     }
     if (!is_null($or)) {
       $rule->condition($or);
+    }
+
+    // If a condition is still present in the temp var, attach it to the given
+    // rule.
+    if (!is_null($temp)) {
+      $rule->condition($temp['name'], $temp['parameters']);
     }
   }
 }
