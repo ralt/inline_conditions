@@ -449,7 +449,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
     $zebra = ($delta % 2) ? 'odd' : 'even';
     $element[$delta] = array(
       '#type' => 'container',
-      '#prefix' => '<div id="' . $id . '" class="container-inline ' . $field['field_name'] . ' ' . $zebra . ' clearfix">',
+      '#prefix' => '<div id="' . $id . '" class="container-inline ' . $field['field_name'] . ' ' . $zebra . ' clearfix ' . drupal_clean_css_identifier($item['condition_name']) . '">',
       '#suffix' => '</div>',
     );
 
