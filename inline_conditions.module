@@ -7,6 +7,7 @@
 // Inline conditions own constants.
 define('INLINE_CONDITIONS_AND', 1);
 define('INLINE_CONDITIONS_OR', 0);
+define('INLINE_CONDITIONS_NOT', -1);
 
 /**
  * Implements hook_menu().
@@ -513,6 +514,7 @@ function inline_conditions_field_widget_form(&$form, &$form_state, $field, $inst
         '#options' => array(
           INLINE_CONDITIONS_OR => t('Or:'),
           INLINE_CONDITIONS_AND => t('And:'),
+          INLINE_CONDITIONS_NOT => t('Not:'),
         ),
         '#default_value' => isset($item['condition_logic_operator']) ? $item['condition_logic_operator'] : INLINE_CONDITIONS_AND,
         '#weight' => -50,
@@ -651,16 +653,19 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
       // in the current field value.
       if (isset($value['condition_logic_operator'])) {
         switch ($value['condition_logic_operator']) {
-          case INLINE_CONDITIONS_AND:
+          case INLINE_CONDITIONS_AND || INLINE_CONDITIONS_NOT:
             if (is_null($and)) {
               $and = rules_and();
             }
             // Attach the condition in the "AND" group.
-            $and->condition($name, $parameters);
+            rules_condition($name, $parameters)
+              // Negate the condition if the given logical operator is NOT.
+              ->negate($value['condition_logic_operator'] == INLINE_CONDITIONS_NOT)
+              ->setParent($and);
             // Try to add the condition stored in temp variable in the current
             // group.
             if (!is_null($temp)) {
-              $and->condition($temp['name'], $temp['parameters']);
+              rules_condition($temp['name'], $temp['parameters'])->setParent($and);
               $temp = NULL;
             }
             break;
@@ -668,15 +673,16 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
             if (is_null($or)) {
               $or = rules_or();
             }
-            // Attach the condition in the "AND" group.
-            $or->condition($name, $parameters);
+            // Attach the condition in the "OR" group.
+            rules_condition($name, $parameters)->setParent($or);
             // Try to add the condition stored in temp variable in the current
             // group.
             if (!is_null($temp)) {
-              $or->condition($temp['name'], $temp['parameters']);
+              rules_condition($temp['name'], $temp['parameters'])->setParent($or);
               $temp = NULL;
             }
             break;
+
         }
         continue;
       }
@@ -689,7 +695,7 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
       );
     }
 
-    // Add conditions based on logical operators groups to given rule.
+    // Add conditions based on logical operators groups to passed rule.
     if (!is_null($and)) {
       $rule->condition($and);
     }
@@ -697,8 +703,7 @@ function inline_conditions_build(RulesReactionRule $rule, $field_values) {
       $rule->condition($or);
     }
 
-    // If a condition is still present in the temp var, attach it to the given
-    // rule.
+    // If a condition is still present in the temp var, attach it on the rule.
     if (!is_null($temp)) {
       $rule->condition($temp['name'], $temp['parameters']);
     }
