@@ -187,11 +187,12 @@ function commerce_order_compare_order_amount_configure($settings) {
       ) . '</div>',
   );
 
+  $default_value = !isset($settings['total']) ? $settings['total']['amount'] : '';
   $form['total']['amount'] = array(
     '#type' => 'textfield',
     '#title' => t('Order subtotal'),
     '#title_display' => 'invisible',
-    '#default_value' => commerce_currency_amount_to_decimal($settings['total']['amount'], $default_currency['code']),
+    '#default_value' => commerce_currency_amount_to_decimal($default_value, $default_currency['code']),
     '#size' => 10,
     '#field_suffix' => $default_currency['code'],
     '#require' => TRUE,
