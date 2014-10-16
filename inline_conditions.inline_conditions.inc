@@ -187,7 +187,7 @@ function commerce_order_compare_order_amount_configure($settings) {
       ) . '</div>',
   );
 
-  $default_value = !isset($settings['total']) ? $settings['total']['amount'] : '';
+  $default_value = isset($settings['total']) ? $settings['total']['amount'] : '';
   $form['total']['amount'] = array(
     '#type' => 'textfield',
     '#title' => t('Order subtotal'),
@@ -218,11 +218,19 @@ function commerce_order_compare_order_amount_configure($settings) {
 function commerce_order_has_owner_configure($settings) {
   $form = array();
 
+  if (isset($settings['account'])) {
+    $account = user_load($settings['account']);
+    $default_value = $account->name;
+  }
+  else {
+    $default_value = '';
+  }
+
   $form['account'] = array(
     '#type' => 'textfield',
     '#title' => t('Users'),
     '#title_display' => 'invisible',
-    '#default_value' => ($account = user_load($settings['account'])) ? $account->name : '',
+    '#default_value' => $default_value,
     '#required' => TRUE,
     '#autocomplete_path' => 'user/autocomplete',
     '#element_validate' => array('_commerce_order_has_owner_validate'),
@@ -300,11 +308,13 @@ function _commerce_order_has_owner_validate($element, &$form_state, $form) {
 function commerce_order_contains_products_configure($settings) {
   // Get values from $settings.
   $default_value = '';
-  foreach ($settings['products'] as $delta => $product_id) {
-    $product = commerce_product_load(reset($product_id));
-    $default_value .= $product->sku;
-    if ($product_id !== end($settings['products'])) {
-      $default_value .= ', ';
+  if (isset($settings['products'])) {
+    foreach ($settings['products'] as $delta => $product_id) {
+      $product = commerce_product_load(reset($product_id));
+      $default_value .= $product->sku;
+      if ($product_id !== end($settings['products'])) {
+        $default_value .= ', ';
+      }
     }
   }
 
