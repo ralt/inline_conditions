@@ -449,7 +449,7 @@ function commerce_product_contains_products_configure($settings) {
   $form = array();
   $default_value = '';
 
-  if (!empty($settings)) {
+  if (!empty($settings) && isset($settings['sku'])) {
     foreach ($settings['sku'] as $delta => $product_id) {
       $product = commerce_product_load(reset($product_id));
       $default_value .= $product->sku;
